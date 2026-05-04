@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Ulang Tahun!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Latar belakang luar dibuat sedikit lebih gelap untuk kontras */
+            background: linear-gradient(135deg, #ffd1d1 0%, #c7d2fe 100%);
+            overflow-x: hidden;
+        }
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
+        .balloon {
+            position: absolute;
+            bottom: -150px;
+            width: 50px;
+            height: 70px;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float Up 10s linear infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); left: var(--left); }
+            100% { transform: translateY(-120vh) rotate(20deg); left: var(--left); }
+        }
+        .card-pop {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-pop:hover {
+            transform: scale(1.02);
+        }
+
+        .cat-ears-gif {
+            position: absolute;
+            top: -110px; 
+            left: 50%;
+            transform: translateX(-50%) scale(0.85);
+            width: 120%; 
+            max-width: none;
+            z-index: 0;
+            pointer-events: none;
+            transition: transform 0.4s ease-in-out;
+            transform-origin: bottom center;
+            /* Memberikan sedikit bayangan pada telinga agar lebih kontras jika background tetap terang */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .profile-container:hover .cat-ears-gif {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .profile-image-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 192px; 
+            height: 192px;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 8px solid white;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="balloon-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Kotak kartu menggunakan warna bg-pink-100/95 yang lebih kontras terhadap putih telinga kucing -->
+    <div class="z-10 bg-pink-100/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl max-w-lg w-full text-center card-pop border-4 border-pink-200">
+        <div class="mb-6">
+            <span class="text-6xl">🎂</span>
+            <h1 class="text-4xl md:text-5xl font-bold text-indigo-700 mt-4 font-cursive">Happy Birthday (≧▽≦)</h1>
+            <p class="text-gray-700 mt-2 italic">i hope you like it #Err_oneOtwo</p>
+        </div>
+
+        <div class="relative w-64 h-64 mx-auto mb-6 profile-container flex items-center justify-center">
+            <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDFvenZ3amlwY3U2Ymw4bm9xNzRsZ29ybHA5dm15NXVyenJlcWdmayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/YCTDxuDtkvehXzvhyC/giphy.gif" 
+                 alt="[Telinga Kucing]" 
+                 class="cat-ears-gif">
+            
+            <div class="profile-image-wrapper">
+                <!-- TEMPAT MELETAKKAN FOTO: Ganti link src di bawah ini dengan URL foto Anda -->
+                <img src="Untitled design.png" 
+                     alt="[Foto Profil]" 
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://via.placeholder.com/200?text=HBD'">
+                <!-- SELESAI TEMPAT MELETAKKAN FOTO -->
+            </div>
+        </div>
+
+        <!-- Box Harapan dengan latar belakang putih agar teks indigo mudah dibaca di atas pink -->
+        <div id="message-box" class="mb-8 p-4 bg-white/70 rounded-xl text-indigo-900 font-semibold min-h-[80px] flex items-center justify-center border border-pink-200">
+            Press The button to see some surprise
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+            <button onclick="surprise()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition-all shadow-lg transform active:scale-95">
+                🎉 Convetty!
+            </button>
+            <button onclick="changeWish()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-full transition-all shadow-lg transform active:scale-95">
+                ✉️ Surprise !!!
+            </button>
+            <button id="gift-btn" onclick="openGift()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-all shadow-lg transform active:scale-95">
+                🎁 Open Message
+            </button>
+        </div>
+    </div>
+
+    <div id="gift-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-90 transition-transform">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">A Present For You !!!</h2>
+            <div class="text-6xl mb-4">🎁 ✨ 💎</div>
+            <p class="text-gray-600 mb-6">"im sorry i almost forgot your borthday, though you mention it before. i hope you enjoy my little present"</p>
+            <button onclick="closeGift()" class="bg-gray-800 text-white py-2 px-6 rounded-lg font-bold">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const wishes = [
+            "Get well soon, and may your recovery be smooth and steady 🌿",
+            "Wishing you strength and better days ahead 💪",
+            "Take it one step at a time, you're doing great 🌸",
+            "I know you’re strong enough to get through this 🌟",
+            "May today bring you peace, comfort, and happiness ☀️",
+            "You’re stronger than you realize, keep going ❤️",
+            "Recovery takes time, but I know you can handle it 🌈",
+            "Hoping your days become brighter and lighter each day ✨",
+            "Stay strong, stay patient, and trust the process 🌱",
+            "You’ve been through a lot, and you’re doing amazingly well 💎",
+            "Even on hard days, remember how far you’ve come 🎈",
+            "I know you can overcome this, one day at a time 🌻",
+            "Take care of yourself and keep moving forward 🍀",
+            "Wishing you a day full of smiles and positive energy 😊",
+            "You’re doing your best, and that’s more than enough 🌺",
+            "Keep believing in yourself, because I believe in you 💙",
+            "Your strength and courage are inspiring 🌟",
+            "May your healing bring you renewed energy and happiness 🌷",
+            "Don’t forget how capable and amazing you are 🌼",
+            "Better days are coming, keep holding on 🌅"
+        ];
+
+        function surprise() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#4f46e5', '#9333ea', '#db2777']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#4f46e5', '#9333ea', '#db2777']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+            
+            const msg = document.getElementById('message-box');
+            msg.innerHTML = "Horeee! Selamat merayakan hari besarmu! 🎊";
+        }
+
+        function changeWish() {
+            const msgBox = document.getElementById('message-box');
+            msgBox.style.opacity = 0;
+            
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * wishes.length);
+                msgBox.innerHTML = wishes[randomIndex];
+                msgBox.style.opacity = 1;
+            }, 300);
+            
+            confetti({
+                particleCount: 40,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#6366f1', '#ffffff']
+            });
+        }
+
+        function openGift() {
+            const modal = document.getElementById('gift-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.querySelector('div').style.transform = 'scale(1)';
+            }, 10);
+            
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#FFD700', '#6366f1']
+            });
+        }
+
+        function closeGift() {
+            const modal = document.getElementById('gift-modal');
+            modal.querySelector('div').style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        }
+
+        function createBalloons() {
+            const container = document.getElementById('balloon-container');
+            const colors = ['#c7d2fe', '#ddd6fe', '#fecaca', '#e0e7ff', '#ffffff'];
+            
+            for(let i = 0; i < 20; i++) {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                balloon.style.setProperty('--left', Math.random() * 100 + 'vw');
+                balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                balloon.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(balloon);
+            }
+        }
+
+        window.onload = () => {
+            createBalloons();
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#6366f1', '#ffffff']
+            });
+        };
+    </script>
+</body>
+</html>
